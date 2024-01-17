@@ -11,6 +11,8 @@ metadata_file_path = '/Users/evelynhoangtran/Universe/MDN projects/skin-Lesion-D
 image_file_path = '/Users/evelynhoangtran/Universe/MDN projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
 
 
+
+
 class Metadata:
     def __init__(self, metadata_dict=None):
         """
@@ -90,6 +92,13 @@ class CustomDataset(Dataset):
         """
         metadata_instance = self.metadata_list[idx]
         img_path = os.path.join(image_file_path, metadata_instance.metadata_dict['image_id']['img_filename'])
+        
+        # Add this check before opening the image
+        if not os.path.exists(img_path):
+            print(f"Image file not found: {img_path}")
+            # Handle the error or continue to the next iteration
+            return None, None
+
         image = Image.open(img_path).convert('RGB')
 
         if self.transformation:
@@ -181,7 +190,15 @@ data_module = SkinLesionDataModule(
     num_workers=4
 )
 
+
+# Load the metadata CSV file
+metadata_df = pd.read_csv(metadata_file_path)
+
+# Split the data into train and validation sets
+train_df, val_df = train_test_split(metadata_df, test_size=0.2, random_state=42)
+
 # Accessing a specific case using case_id (example)
 case_id = 0
-specific_case = data_module.train_metadata_list[case_id]
+specific_case = data_module.create_metadata_list(train_df)[case_id]
 specific_case.display_metadata()
+
