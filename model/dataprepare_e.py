@@ -1,14 +1,21 @@
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import pytorch_lightning as pl
+from torch.utils.data import DataLoader
 from torchvision import transforms
-from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import os
 import pandas as pd
-import pytorch_lightning as pl
 from sklearn.model_selection import train_test_split
+from torch.utils.data import Dataset
+
+#from utils import show_batch_images
 
 # Set paths to metadata and image folders
-metadata_file_path = '/Users/evelynhoangtran/Universe/MDN projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
-image_file_path = '/Users/evelynhoangtran/Universe/MDN projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
+metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
+image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
 
 
 
@@ -182,6 +189,48 @@ class SkinLesionDataModule(pl.LightningDataModule):
         dataset = CustomDataset(metadata_list=self.val_metadata_list, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
+
+class SimpleCNN(pl.LightningModule):
+    def __init__(self, num_classes=7):
+        super(SimpleCNN, self).__init__()
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.fc1 = nn.Linear(128 * 56 * 56, 256)
+        self.fc2 = nn.Linear(256, num_classes)
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        x = self.relu(self.conv1(x))
+        x = self.pool(x)
+        x = self.relu(self.conv2(x))
+        x = self.pool(x)
+        x = x.view(-1, 128 * 56 * 56)
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+    def training_step(self, batch, batch_idx):
+        images, labels = batch
+        outputs = self(images)
+        loss = nn.CrossEntropyLoss()(outputs, labels)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        images, labels = batch
+        outputs = self(images)
+        loss = nn.CrossEntropyLoss()(outputs, labels)
+        return loss
+
+    def configure_optimizers(self):
+        return optim.Adam(self.parameters(), lr=0.001)
+
+
+# Function to show a batch of images (replace with your own implementation)
+def show_batch_images(batch):
+    # Your implementation to display images goes here
+    pass
+
 # Instantiate the SkinLesionDataModule
 data_module = SkinLesionDataModule(
     metadata_file=metadata_file_path,
@@ -190,6 +239,7 @@ data_module = SkinLesionDataModule(
     num_workers=4
 )
 
+data_module.setup()
 
 # Load the metadata CSV file
 metadata_df = pd.read_csv(metadata_file_path)
@@ -197,8 +247,32 @@ metadata_df = pd.read_csv(metadata_file_path)
 # Split the data into train and validation sets
 train_df, val_df = train_test_split(metadata_df, test_size=0.2, random_state=42)
 
+# Create Metadata instances for training and validation
+train_metadata_list = data_module.create_metadata_list(train_df)
+val_metadata_list = data_module.create_metadata_list(val_df)
+
+# Instantiate the model
+model = SimpleCNN()
+
+# Assuming you have the DataLoader and LightningDataModule set up
+train_dataloader = data_module.train_dataloader()
+val_dataloader = data_module.val_dataloader()
+
+# Instantiate the Lightning Trainer
+# Use gpus=0 for CPU-only training
+trainer = pl.Trainer(max_epochs=5, gpus=1)
+
+# Train the model
+trainer.fit(model, train_dataloader, val_dataloader)
+
 # Accessing a specific case using case_id (example)
 case_id = 0
-specific_case = data_module.create_metadata_list(train_df)[case_id]
+specific_case = train_metadata_list[case_id]
 specific_case.display_metadata()
+
+# Show a batch of images (replace with your own implementation)
+# Note: Make sure you have the show_batch_images function implemented
+batch_images, batch_labels = next(iter(train_dataloader))
+show_batch_images(batch_images)
+
 
