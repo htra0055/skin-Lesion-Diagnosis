@@ -14,7 +14,7 @@ def main():
     data_module = SkinLesionDataModule(
         metadata_file=metadata_file_path,
         image_folder=image_file_path,
-        batch_size=64,
+        batch_size=4,
         num_workers=4
     )
 

@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader, Dataset
 from sklearn.model_selection import train_test_split
 import torch
 import pytorch_lightning as pl
-from utils import label_to_str, str_to_label, show_batch_images, get_file_path
 import torchvision
 from matplotlib import pyplot as plt
 import numpy as np
