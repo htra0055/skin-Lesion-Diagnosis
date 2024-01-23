@@ -8,10 +8,18 @@ from torch.utils.data import DataLoader, Dataset
 from sklearn.model_selection import train_test_split
 import torch
 import pytorch_lightning as pl
+from utils import label_to_str, str_to_label, show_batch_images, get_file_path
+import torchvision
+from matplotlib import pyplot as plt
+import numpy as np
+
 
 # Set paths to metadata and image folders
-metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
-image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
+metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
+image_file_path = 'data/hamDataset/HAM10000_images'
+
+# metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
+# image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
 
 
 class Metadata:
@@ -164,8 +172,12 @@ class SkinLesionDataModule(pl.LightningDataModule):
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
         ])
 
-        dataset = CustomDataset(metadata_list=self.train_metadata_list, transformation=transform)
+        train_metadata_list_filtered = [metadata for metadata in self.train_metadata_list if metadata is not None]
+        
+        
+        dataset = CustomDataset(metadata_list=train_metadata_list_filtered, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+    
 
     def val_dataloader(self):
         """Get DataLoader for validation data."""
@@ -177,3 +189,8 @@ class SkinLesionDataModule(pl.LightningDataModule):
 
         dataset = CustomDataset(metadata_list=self.val_metadata_list, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+
+
+
+
+
