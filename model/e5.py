@@ -26,7 +26,7 @@ def main():
     train_dataloader = data_module.train_dataloader()
     val_dataloader = data_module.val_dataloader()
 
-    trainer = pl.Trainer(max_epochs=5, gpus=1)
+    trainer = pl.Trainer(max_epochs=5, accelerator='gpu')
     trainer.fit(model, train_dataloader, val_dataloader)
 
 if __name__ == "__main__":

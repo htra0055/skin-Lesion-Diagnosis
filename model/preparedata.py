@@ -124,6 +124,17 @@ class SkinLesionDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
 
+    
+    def setup(self, stage=None):
+        # Split data into train and validation sets and create Metadata instances
+        metadata_df = pd.read_csv(self.metadata_file)
+        train_df, val_df = train_test_split(metadata_df, test_size=0.2, random_state=42)
+
+        # Create Metadata instances for training and validation
+        self.train_metadata_list = self.create_metadata_list(train_df)
+        self.val_metadata_list = self.create_metadata_list(val_df)
+
+
     def create_metadata_list(self, df):
         """
         Create a list of Metadata instances from a DataFrame.
