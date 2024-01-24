@@ -1,19 +1,21 @@
-# test.py
-
+"""
+Originally called e4.py. Used to show the images in a batch.
+"""
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from model.preparedata import show_batch_images, SkinLesionDataModule
+from preparedata import SkinLesionDataModule
+from model import ModelCNN
 
 # Set paths to metadata and image folders
-metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
-image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
+metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
+image_file_path = 'data/hamDataset/HAM10000_images'
 
 
 def main():
     data_module = SkinLesionDataModule(
         metadata_file=metadata_file_path,
         image_folder=image_file_path,
-        batch_size=64,
+        batch_size=4,
         num_workers=4
     )
 
@@ -36,8 +38,9 @@ def main():
 
     # Show a batch of images
     batch_images, batch_labels = next(iter(data_module.train_dataloader()))
-    show_batch_images(batch_images, batch_labels)
+    ModelCNN.show_batch_images(batch_images, batch_labels)
 
+   
 
 if __name__ == "__main__":
     main()

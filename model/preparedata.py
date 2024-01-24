@@ -11,6 +11,7 @@ import pytorch_lightning as pl
 import torchvision
 from matplotlib import pyplot as plt
 import numpy as np
+from utils import label_to_str, str_to_label
 
 
 # Set paths to metadata and image folders
@@ -111,6 +112,9 @@ class CustomDataset(Dataset):
 
         label = metadata_instance.metadata_dict['dx']['dx']
 
+        # Convert label to a integer
+        label = str_to_label(label)
+
         return image, label
 
 
@@ -133,13 +137,17 @@ class SkinLesionDataModule(pl.LightningDataModule):
 
     
     def setup(self, stage=None):
-        # Split data into train and validation sets and create Metadata instances
+        # Split data into train, validation, and test sets and create Metadata instances
         metadata_df = pd.read_csv(self.metadata_file)
-        train_df, val_df = train_test_split(metadata_df, test_size=0.2, random_state=42)
+        
+        # Split into train, val, and test sets
+        train_df, temp_df = train_test_split(metadata_df, test_size=0.2, random_state=42)
+        val_df, test_df = train_test_split(temp_df, test_size=0.5, random_state=42)
 
-        # Create Metadata instances for training and validation
+        # Create Metadata instances for training, validation, and test
         self.train_metadata_list = self.create_metadata_list(train_df)
         self.val_metadata_list = self.create_metadata_list(val_df)
+        self.test_metadata_list = self.create_metadata_list(test_df)
 
 
     def create_metadata_list(self, df):
@@ -164,24 +172,22 @@ class SkinLesionDataModule(pl.LightningDataModule):
     def train_dataloader(self):
         """Get DataLoader for training data."""
         transform = transforms.Compose([
-            transforms.Resize(size=224),
+            transforms.Resize(size=(224,224)),
             transforms.RandomHorizontalFlip(),
-            transforms.CenterCrop(200),
+            # transforms.CenterCrop(200),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
         ])
-
-        train_metadata_list_filtered = [metadata for metadata in self.train_metadata_list if metadata is not None]
         
         
-        dataset = CustomDataset(metadata_list=train_metadata_list_filtered, transformation=transform)
+        dataset = CustomDataset(metadata_list=self.train_metadata_list, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
     
 
     def val_dataloader(self):
         """Get DataLoader for validation data."""
         transform = transforms.Compose([
-            transforms.Resize(size=224),
+            transforms.Resize(size=(224,224)),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
         ])
@@ -189,6 +195,17 @@ class SkinLesionDataModule(pl.LightningDataModule):
         dataset = CustomDataset(metadata_list=self.val_metadata_list, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
+
+    def test_dataloader(self):
+        """Get DataLoader for testing data."""
+        transform = transforms.Compose([
+            transforms.Resize(size=(224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
+        ])
+
+        dataset = CustomDataset(metadata_list=self.test_metadata_list, transformation=transform)
+        return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
 
 

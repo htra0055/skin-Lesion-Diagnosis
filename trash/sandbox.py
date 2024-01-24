@@ -2,7 +2,7 @@
 For testing and running things
 """
 from preparedata import SkinLesionDataModule
-from trash.utils import show_batch_images
+from model.utils import show_batch_images
 
 
 
