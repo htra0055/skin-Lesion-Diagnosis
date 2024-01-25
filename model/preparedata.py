@@ -64,16 +64,20 @@ class Metadata:
 
 
 class CustomDataset(Dataset):
-    def __init__(self, metadata_list, transformation=None):
+    def __init__(self, metadata_list, class_mapping, transformation=None):
         """
         Custom PyTorch dataset for skin lesion images.
 
         Args:
             metadata_list (list): List of Metadata instances.
             transformation (callable, optional): Image transformation. Defaults to None.
+            class_mapping (dict): Mapping from string labels to integers
         """
         self.metadata_list = metadata_list
         self.transformation = transformation
+        self.class_mapping = class_mapping
+
+       # self.class_mapping = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
 
     def __len__(self):
         """Get the number of samples in the dataset."""
@@ -102,13 +106,14 @@ class CustomDataset(Dataset):
         if self.transformation:
             image = self.transformation(image)
 
-        label = metadata_instance.metadata_dict['dx']['dx']
-
+        label_str = metadata_instance.metadata_dict['dx']['dx']
+        label = self.class_mapping[label_str]
+        
         return image, label
 
 
 class SkinLesionDataModule(pl.LightningDataModule):
-    def __init__(self, metadata_file, image_folder, batch_size, num_workers):
+    def __init__(self, metadata_file, image_folder, batch_size, num_workers, class_mapping):
         """
         PyTorch Lightning DataModule for skin lesion image data.
 
@@ -117,12 +122,16 @@ class SkinLesionDataModule(pl.LightningDataModule):
             image_folder (str): Path to the folder containing image files.
             batch_size (int): Batch size for DataLoader.
             num_workers (int): Number of workers for DataLoader.
+            class_mapping (dict): Mapping from string labels to integers
         """
+
+
         super().__init__()
         self.metadata_file = metadata_file
         self.image_folder = image_folder
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.class_mapping = class_mapping
 
     
     def setup(self, stage=None):
@@ -164,8 +173,12 @@ class SkinLesionDataModule(pl.LightningDataModule):
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
         ])
 
-        dataset = CustomDataset(metadata_list=self.train_metadata_list, transformation=transform)
+        class_mapping = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
+
+
+        dataset = CustomDataset(metadata_list=self.train_metadata_list, class_mapping=class_mapping, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+
 
     def val_dataloader(self):
         """Get DataLoader for validation data."""
@@ -174,6 +187,7 @@ class SkinLesionDataModule(pl.LightningDataModule):
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
         ])
+        class_mapping = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
 
-        dataset = CustomDataset(metadata_list=self.val_metadata_list, transformation=transform)
+        dataset = CustomDataset(metadata_list=self.val_metadata_list, class_mapping=class_mapping, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
