@@ -25,6 +25,7 @@ def label_to_str(label: int) -> str:
             'nv': 5,
             'vasc': 6
         }
+    
     return list(label_map.keys())[list(label_map.values()).index(label)]
 
 def str_to_label(diagnosis: str) -> int:

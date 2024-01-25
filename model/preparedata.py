@@ -15,11 +15,12 @@ from utils import label_to_str, str_to_label
 
 
 # Set paths to metadata and image folders
-metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
-image_file_path = 'data/hamDataset/HAM10000_images'
+# metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
+# image_file_path = 'data/hamDataset/HAM10000_images'
 
-# metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
-# image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
+metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
+image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
+
 
 
 class Metadata:
@@ -72,7 +73,7 @@ class Metadata:
 
 
 class CustomDataset(Dataset):
-    def __init__(self, metadata_list, class_mapping, transformation=None):
+    def __init__(self, metadata_list, transformation=None):
         """
         Custom PyTorch dataset for skin lesion images.
 
@@ -83,7 +84,6 @@ class CustomDataset(Dataset):
         """
         self.metadata_list = metadata_list
         self.transformation = transformation
-        self.class_mapping = class_mapping
 
        # self.class_mapping = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
 
@@ -114,22 +114,14 @@ class CustomDataset(Dataset):
         if self.transformation:
             image = self.transformation(image)
 
-<<<<<<< HEAD
         label_str = metadata_instance.metadata_dict['dx']['dx']
-        label = self.class_mapping[label_str]
+        label = str_to_label(label_str)
         
-=======
-        label = metadata_instance.metadata_dict['dx']['dx']
-
-        # Convert label to a integer
-        label = str_to_label(label)
-
->>>>>>> 5042873b1ab2dfd90f4ed5d8138849eae6a8a8fb
         return image, label
 
 
 class SkinLesionDataModule(pl.LightningDataModule):
-    def __init__(self, metadata_file, image_folder, batch_size, num_workers, class_mapping):
+    def __init__(self, metadata_file, image_folder, batch_size, num_workers):
         """
         PyTorch Lightning DataModule for skin lesion image data.
 
@@ -138,7 +130,7 @@ class SkinLesionDataModule(pl.LightningDataModule):
             image_folder (str): Path to the folder containing image files.
             batch_size (int): Batch size for DataLoader.
             num_workers (int): Number of workers for DataLoader.
-            class_mapping (dict): Mapping from string labels to integers
+            #class_mapping (dict): Mapping from string labels to integers
         """
 
 
@@ -147,7 +139,6 @@ class SkinLesionDataModule(pl.LightningDataModule):
         self.image_folder = image_folder
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.class_mapping = class_mapping
 
     
     def setup(self, stage=None):
@@ -192,17 +183,9 @@ class SkinLesionDataModule(pl.LightningDataModule):
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
         ])
-<<<<<<< HEAD
-
-        class_mapping = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
-
-
-        dataset = CustomDataset(metadata_list=self.train_metadata_list, class_mapping=class_mapping, transformation=transform)
-=======
         
         
         dataset = CustomDataset(metadata_list=self.train_metadata_list, transformation=transform)
->>>>>>> 5042873b1ab2dfd90f4ed5d8138849eae6a8a8fb
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
     
 
@@ -214,28 +197,50 @@ class SkinLesionDataModule(pl.LightningDataModule):
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
         ])
-        class_mapping = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
+        #class_mapping = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
 
-<<<<<<< HEAD
-        dataset = CustomDataset(metadata_list=self.val_metadata_list, class_mapping=class_mapping, transformation=transform)
-        return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
-=======
         dataset = CustomDataset(metadata_list=self.val_metadata_list, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
+    def label_to_str(self, label: int) -> str:
+        """
+        Function to convert the label (int) to a string describing the diagnosis.
 
-    def test_dataloader(self):
-        """Get DataLoader for testing data."""
-        transform = transforms.Compose([
-            transforms.Resize(size=(224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
-        ])
+        Args:
+            label (int): The numerical label to be converted.
 
-        dataset = CustomDataset(metadata_list=self.test_metadata_list, transformation=transform)
-        return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+        Returns:
+            str: The string representation of the label e.g. bkl, bcc, akiec, vasc, df, mel, nv.
+        """
+        label_map = {
+                'akiec': 0,
+                'bcc': 1,
+                'bkl': 2,
+                'df': 3,
+                'mel': 4,
+                'nv': 5,
+                'vasc': 6
+            }
+        
+        return list(label_map.keys())[list(label_map.values()).index(label)]
 
+    def str_to_label(self, diagnosis: str) -> int:
+        """
+        Converts a skin lesion diagnosis string to its corresponding label.
 
+        Args:
+            diagnosis (str): The skin lesion diagnosis.
 
-
->>>>>>> 5042873b1ab2dfd90f4ed5d8138849eae6a8a8fb
+        Returns:
+            int: The corresponding label for the diagnosis.
+        """
+        label_map = {
+            'akiec': 0,
+            'bcc': 1,
+            'bkl': 2,
+            'df': 3,
+            'mel': 4,
+            'nv': 5,
+            'vasc': 6
+        }
+        return label_map[diagnosis]
