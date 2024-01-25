@@ -6,10 +6,15 @@ from sklearn.model_selection import train_test_split
 from preparedata import SkinLesionDataModule
 from model import ModelCNN
 
-# Set paths to metadata and image folders
-metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
-image_file_path = 'data/hamDataset/HAM10000_images'
+metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
+image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
 
+
+
+# Set paths to metadata and image folders
+# metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
+# image_file_path = 'data/hamDataset/HAM10000_images'
+#class_mapping = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
 
 def main():
     data_module = SkinLesionDataModule(
@@ -17,6 +22,7 @@ def main():
         image_folder=image_file_path,
         batch_size=4,
         num_workers=4
+
     )
 
     data_module.setup()
