@@ -7,6 +7,7 @@ import torch.optim as optim
 import pytorch_lightning as pl
 import torchvision
 import matplotlib.pyplot as plt
+import torchmetrics
 from utils import label_to_str
 
 class ModelCNN(pl.LightningModule):
@@ -47,6 +48,9 @@ class ModelCNN(pl.LightningModule):
         self.relu = nn.ReLU()
 
         self.test_saved_outputs = []
+        self.outputs = []
+        
+        self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=7)
 
     def forward(self, x):
         """
@@ -85,6 +89,10 @@ class ModelCNN(pl.LightningModule):
         """
         images, labels = batch
         outputs = self(images)
+
+        self.accuracy(outputs, labels)
+        self.log('train_acc_step', self.accuracy, on_step=True, on_epoch=False, prog_bar=True)
+
         loss = nn.CrossEntropyLoss()(outputs, labels)
         return loss
 
@@ -102,6 +110,10 @@ class ModelCNN(pl.LightningModule):
         """
         images, labels = batch
         outputs = self(images)
+
+        self.accuracy(outputs, labels)
+        self.log('val_acc_step', self.accuracy, on_step=True, on_epoch=False, prog_bar=True)
+
         loss = nn.CrossEntropyLoss()(outputs, labels)
         return loss
 
@@ -124,6 +136,7 @@ class ModelCNN(pl.LightningModule):
         self.test_saved_outputs.append({'outputs': outputs, 'loss': loss.item()})
         return loss
 
+
     def configure_optimizers(self):
         """
         Configures the optimizer for training.
@@ -132,7 +145,7 @@ class ModelCNN(pl.LightningModule):
             torch.optim.Optimizer: The optimizer.
 
         """
-        return optim.Adam(self.parameters(), lr=0.001)
+        return optim.Adam(self.parameters(), lr=0.01)
 
     @staticmethod
     def show_batch_images(batch_images, batch_labels):
@@ -180,3 +193,5 @@ class ModelCNN(pl.LightningModule):
         with open('test_results.json', 'w') as file:
             json.dump(results_dict, file)
         return {'avg_test_loss': avg_loss.item()}
+
+    
