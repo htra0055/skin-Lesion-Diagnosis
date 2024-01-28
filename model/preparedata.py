@@ -15,11 +15,11 @@ from utils import label_to_str, str_to_label
 
 
 # Set paths to metadata and image folders
-# metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
-# image_file_path = 'data/hamDataset/HAM10000_images'
+metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
+image_file_path = 'data/hamDataset/HAM10000_images'
 
-metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
-image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
+# metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
+# image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
 
 
 
@@ -187,8 +187,6 @@ class SkinLesionDataModule(pl.LightningDataModule):
         
         dataset = CustomDataset(metadata_list=self.train_metadata_list, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
-    
-
 
     def val_dataloader(self):
         """Get DataLoader for validation data."""
@@ -200,6 +198,17 @@ class SkinLesionDataModule(pl.LightningDataModule):
         #class_mapping = {'akiec': 0, 'bcc': 1, 'bkl': 2, 'df': 3, 'mel': 4, 'nv': 5, 'vasc': 6}
 
         dataset = CustomDataset(metadata_list=self.val_metadata_list, transformation=transform)
+        return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+
+    def test_dataloader(self):
+        """Get DataLoader for testing data."""
+        transform = transforms.Compose([
+            transforms.Resize(size=(224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # Imagenet standards
+        ])
+
+        dataset = CustomDataset(metadata_list=self.test_metadata_list, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
     def label_to_str(self, label: int) -> str:

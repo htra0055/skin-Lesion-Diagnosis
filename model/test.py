@@ -8,14 +8,12 @@ from preparedata import SkinLesionDataModule
 import pytorch_lightning as pl
 
 # Set paths to metadata and image folders
+# metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
+# image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
 
-metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
-image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
+metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
+image_file_path = 'data/hamDataset/HAM10000_images'
 
-
-
-# metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
-# image_file_path = 'data/hamDataset/HAM10000_images'
 
 def main():
     # Create a data module instance
