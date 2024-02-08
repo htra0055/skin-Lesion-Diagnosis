@@ -47,10 +47,18 @@ class ModelCNN(pl.LightningModule):
         self.fc2 = nn.Linear(256, num_classes)
         self.relu = nn.ReLU()
 
+        # self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1, stride=1)
+        # self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1, stride=1)
+        # self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        # self.fc1 = nn.Linear(64 * 56 * 56, 128)
+        # self.fc2 = nn.Linear(128, num_classes)
+        # self.relu = nn.ReLU()
+
         self.test_saved_outputs = []
         self.outputs = []
         
         self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=7)
+        self.lr = 0.01
 
     def forward(self, x):
         """
@@ -145,7 +153,7 @@ class ModelCNN(pl.LightningModule):
             torch.optim.Optimizer: The optimizer.
 
         """
-        return optim.Adam(self.parameters(), lr=0.01)
+        return optim.Adam(self.parameters(), lr=self.lr)
 
     @staticmethod
     def show_batch_images(batch_images, batch_labels):

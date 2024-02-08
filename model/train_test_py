@@ -1,24 +1,15 @@
-"""
-Originally called e5.py. Used to train the model.
-"""
-
 import pytorch_lightning as pl
 import torch
-from torch.utils.data import DataLoader
-
 from preparedata import SkinLesionDataModule
 from model import ModelCNN
 
 
-# Set paths to metadata and image folders
-# metadata_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_metadata.csv'
-# image_file_path = '/Users/evelynhoangtran/Universe/MDN_projects/skin-Lesion-Diagnosis/data/hamDataset/HAM10000_images_part_1'
-
-metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
-image_file_path = 'data/hamDataset/HAM10000_images'
-
 
 def main():
+    metadata_file_path = 'data/hamDataset/HAM10000_metadata.csv'
+    image_file_path = 'data/hamDataset/HAM10000_images'
+
+    
     # Create a data module instance
     data_module = SkinLesionDataModule(
         metadata_file=metadata_file_path,
@@ -36,12 +27,23 @@ def main():
     test_dataloader = data_module.test_dataloader()
 
     # Train the data
-    trainer = pl.Trainer(max_epochs=10)
+    trainer = pl.Trainer(max_epochs=5)
     trainer.fit(model, train_dataloader, val_dataloader)
 
     # Saving the trained model into file 'trained_model.pth'
-    torch.save(model.state_dict(), 'trained_model_2_ep.pth')
+    torch.save(model.state_dict(), 'trained_model_5_ep.pth')
 
+
+    # Load pre-trained model from file 'trained_model.pth'
+    loaded_model = ModelCNN()
+    path = F"/content/gdrive/My Drive/trained_model_5ep{model_save_name}.pth" 
+    loaded_model.load_state_dict(torch.load('trained_model_5_ep.pth'))
+
+    # Set the model to evaluation mode
+    loaded_model.eval()
+
+    # Run the testing loop
+    trainer.test(loaded_model, test_dataloader)
     
 if __name__ == "__main__":
     main()

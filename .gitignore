@@ -6,3 +6,4 @@ trained_model.pth
 .vscode/
 model/__pycache__/
 .gitignore/
+models/

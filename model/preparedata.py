@@ -34,17 +34,8 @@ class Metadata:
         if metadata_dict is None:
             metadata_dict = {
                 'lesion_id': '',
-                'image_id': {
-                    'img_filename': '',
-                    'img_size': 0
-                },
-                'dx': {
-                    'dx': '',
-                    'dx_type': '',
-                    'age': 0,
-                    'sex': '',
-                    'localization': '',
-                }
+                'image_id': '',
+                'dx': ''
             }
         self.metadata_dict = metadata_dict
 
@@ -59,13 +50,8 @@ class Metadata:
         img_filename = os.path.basename(image_path)
         img_size = os.path.getsize(image_path)
         self.metadata_dict['lesion_id'] = row['lesion_id']
-        self.metadata_dict['image_id']['img_filename'] = img_filename
-        self.metadata_dict['image_id']['img_size'] = img_size
-        self.metadata_dict['dx']['dx'] = row['dx']
-        self.metadata_dict['dx']['dx_type'] = row['dx_type']
-        self.metadata_dict['dx']['age'] = row['age']
-        self.metadata_dict['dx']['sex'] = row['sex']
-        self.metadata_dict['dx']['localization'] = row['localization']
+        self.metadata_dict['image_id'] = img_filename
+        self.metadata_dict['dx'] = row['dx']
 
     def display_metadata(self):
         """Display the metadata information."""
@@ -102,7 +88,7 @@ class CustomDataset(Dataset):
             tuple: Tuple containing the image and label.
         """
         metadata_instance = self.metadata_list[idx]
-        img_path = os.path.join(image_file_path, metadata_instance.metadata_dict['image_id']['img_filename'])
+        img_path = os.path.join(image_file_path, metadata_instance.metadata_dict['image_id'])
 
         # This check before opening the image
         if not os.path.exists(img_path):
@@ -114,10 +100,54 @@ class CustomDataset(Dataset):
         if self.transformation:
             image = self.transformation(image)
 
-        label_str = metadata_instance.metadata_dict['dx']['dx']
-        label = str_to_label(label_str)
+        label_str = metadata_instance.metadata_dict['dx']
+        label = self.str_to_label(label_str)
         
         return image, label
+    
+    def label_to_str(self, label: int) -> str:
+        """
+        Function to convert the label (int) to a string describing the diagnosis.
+
+        Args:
+            label (int): The numerical label to be converted.
+
+        Returns:
+            str: The string representation of the label e.g. bkl, bcc, akiec, vasc, df, mel, nv.
+        """
+        label_map = {
+                'akiec': 0,
+                'bcc': 1,
+                'bkl': 2,
+                'df': 3,
+                'mel': 4,
+                'nv': 5,
+                'vasc': 6
+            }
+        
+        return list(label_map.keys())[list(label_map.values()).index(label)]
+
+    def str_to_label(self, diagnosis: str) -> int:
+        """
+        Converts a skin lesion diagnosis string to its corresponding label.
+
+        Args:
+            diagnosis (str): The skin lesion diagnosis.
+
+        Returns:
+            int: The corresponding label for the diagnosis.
+        """
+        label_map = {
+            'akiec': 0,
+            'bcc': 1,
+            'bkl': 2,
+            'df': 3,
+            'mel': 4,
+            'nv': 5,
+            'vasc': 6
+        }
+        return label_map[diagnosis]
+
 
 
 class SkinLesionDataModule(pl.LightningDataModule):
@@ -211,45 +241,3 @@ class SkinLesionDataModule(pl.LightningDataModule):
         dataset = CustomDataset(metadata_list=self.test_metadata_list, transformation=transform)
         return DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
-    def label_to_str(self, label: int) -> str:
-        """
-        Function to convert the label (int) to a string describing the diagnosis.
-
-        Args:
-            label (int): The numerical label to be converted.
-
-        Returns:
-            str: The string representation of the label e.g. bkl, bcc, akiec, vasc, df, mel, nv.
-        """
-        label_map = {
-                'akiec': 0,
-                'bcc': 1,
-                'bkl': 2,
-                'df': 3,
-                'mel': 4,
-                'nv': 5,
-                'vasc': 6
-            }
-        
-        return list(label_map.keys())[list(label_map.values()).index(label)]
-
-    def str_to_label(self, diagnosis: str) -> int:
-        """
-        Converts a skin lesion diagnosis string to its corresponding label.
-
-        Args:
-            diagnosis (str): The skin lesion diagnosis.
-
-        Returns:
-            int: The corresponding label for the diagnosis.
-        """
-        label_map = {
-            'akiec': 0,
-            'bcc': 1,
-            'bkl': 2,
-            'df': 3,
-            'mel': 4,
-            'nv': 5,
-            'vasc': 6
-        }
-        return label_map[diagnosis]
