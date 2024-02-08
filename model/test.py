@@ -45,9 +45,14 @@ def main():
     # trainer.test(loaded_model, test_dataloader)
     folder_path = "models"
     filenames = get_filenames_in_folder('models')
-    for file in filenames:
-        correct, total, accuracy = evaluate_accuracy(model, test_dataloader, file, folder_path)
-        save_to_csv((file, correct, total, accuracy), 'accuracy.csv')
+    output_file = 'accuracy.csv'
+    with open(output_file, 'a', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Filename', 'Correct', 'Total', 'Accuracy'])  # Writing header
+        for file in filenames:
+            correct, total, accuracy = evaluate_accuracy(model, test_dataloader, file, folder_path)
+            # save to csv file
+            writer.writerow((correct, total, accuracy))
 
 
 def evaluate_accuracy(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLoader, filename, folderpath) -> float:
@@ -71,11 +76,8 @@ def get_filenames_in_folder(folder_path):
     filenames = os.listdir(folder_path)
     return filenames
 
-def save_to_csv(data, filename):
-    with open(filename, 'a', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['Filename', 'Correct', 'Total', 'Accuracy'])  # Writing header
-        writer.writerow(data)
+        
+        
 
 
 
