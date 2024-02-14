@@ -1,0 +1,10 @@
+Filename,Correct,Total,Accuracy
+trained_resnet_model_11ep1.pth,762,1002,0.7604790419161677
+trained_resnet_model_11ep2.pth,735,1002,0.7335329341317365
+trained_resnet_model_11ep3.pth,767,1002,0.7654690618762475
+trained_resnet_model_11ep4.pth,751,1002,0.7495009980039921
+trained_resnet_model_11ep5.pth,756,1002,0.7544910179640718
+trained_resnet_model_11ep6.pth,765,1002,0.7634730538922155
+trained_resnet_model_11ep7.pth,761,1002,0.7594810379241517
+trained_resnet_model_11ep8.pth,764,1002,0.7624750499001997
+trained_resnet_model_11ep9.pth,755,1002,0.7534930139720559
