@@ -7,3 +7,4 @@ trained_model.pth
 model/__pycache__/
 .gitignore/
 models/
+resnetmodels/

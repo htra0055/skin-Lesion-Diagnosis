@@ -1,5 +1,3 @@
-# model.py
-
 import json
 import torch
 import torch.nn as nn
@@ -53,10 +51,8 @@ class ModelCNN(pl.LightningModule):
         # self.fc1 = nn.Linear(64 * 56 * 56, 128)
         # self.fc2 = nn.Linear(128, num_classes)
         # self.relu = nn.ReLU()
-
-        self.test_saved_outputs = []
-        self.outputs = []
         
+        # Is this nee
         self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=7)
         self.lr = 0.01
 
@@ -141,7 +137,7 @@ class ModelCNN(pl.LightningModule):
         outputs = self(images)
         loss = nn.CrossEntropyLoss()(outputs, labels)
 
-        self.test_saved_outputs.append({'outputs': outputs, 'loss': loss.item()})
+        self.log('val_acc_step', self.accuracy, on_step=True, on_epoch=False, prog_bar=True)
         return loss
 
 
