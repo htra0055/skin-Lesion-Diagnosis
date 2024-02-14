@@ -36,25 +36,28 @@ class ModelCNN(pl.LightningModule):
 
     """
 
-    def __init__(self, num_classes=7):
+    def __init__(self, num_classes=7, lr=0.01):
         super(ModelCNN, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1)
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.fc1 = nn.Linear(128 * 56 * 56, 256)
-        self.fc2 = nn.Linear(256, num_classes)
-        self.relu = nn.ReLU()
 
-        # self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1, stride=1)
-        # self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1, stride=1)
+        # Larger Model
+        # self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, padding=1)
+        # self.conv2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1)
         # self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        # self.fc1 = nn.Linear(64 * 56 * 56, 128)
-        # self.fc2 = nn.Linear(128, num_classes)
+        # self.fc1 = nn.Linear(128 * 56 * 56, 256)
+        # self.fc2 = nn.Linear(256, num_classes)
         # self.relu = nn.ReLU()
+
+        # Smaller Model
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1, stride=1)
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1, stride=1)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.fc1 = nn.Linear(64 * 56 * 56, 128)
+        self.fc2 = nn.Linear(128, num_classes)
+        self.relu = nn.ReLU()
         
-        # Is this nee
+        # Is this needed
         self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=7)
-        self.lr = 0.01
+        self.lr = lr
 
     def forward(self, x):
         """
