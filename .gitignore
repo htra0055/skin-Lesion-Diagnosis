@@ -1,10 +1,7 @@
 /data/
-.idea/
 lightning_logs/
-.gitignore
-trained_model.pth
+.idea/
 .vscode/
 model/__pycache__/
-.gitignore/
 models/
 resnetmodels/
