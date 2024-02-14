@@ -1,7 +1,3 @@
-"""
-Originally called e5.py. Used to train the model.
-"""
-
 import pytorch_lightning as pl
 import torch
 from preparedata import SkinLesionDataModule
@@ -21,11 +17,14 @@ def main():
     )
     # Setup the data module by loading metadata and splitting into train and validation sets
     data_module.setup()
+    train_dataloader = data_module.train_dataloader()
+    val_dataloader = data_module.val_dataloader()
+
+    # Training different learning rates
+    learning_rates = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]
 
     # Create a model instance and load the data
     model = ModelCNN()
-    train_dataloader = data_module.train_dataloader()
-    val_dataloader = data_module.val_dataloader()
 
     # Train the data
     trainer = pl.Trainer(max_epochs=10)
