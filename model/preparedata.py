@@ -11,7 +11,7 @@ import pytorch_lightning as pl
 import torchvision
 from matplotlib import pyplot as plt
 import numpy as np
-from utils import label_to_str, str_to_label
+from utils import str_to_label
 
 
 # Set paths to metadata and image folders
@@ -101,53 +101,11 @@ class CustomDataset(Dataset):
             image = self.transformation(image)
 
         label_str = metadata_instance.metadata_dict['dx']
-        label = self.str_to_label(label_str)
+        label = str_to_label(label_str)
         
         return image, label
     
-    def label_to_str(self, label: int) -> str:
-        """
-        Function to convert the label (int) to a string describing the diagnosis.
-
-        Args:
-            label (int): The numerical label to be converted.
-
-        Returns:
-            str: The string representation of the label e.g. bkl, bcc, akiec, vasc, df, mel, nv.
-        """
-        label_map = {
-                'akiec': 0,
-                'bcc': 1,
-                'bkl': 2,
-                'df': 3,
-                'mel': 4,
-                'nv': 5,
-                'vasc': 6
-            }
-        
-        return list(label_map.keys())[list(label_map.values()).index(label)]
-
-    def str_to_label(self, diagnosis: str) -> int:
-        """
-        Converts a skin lesion diagnosis string to its corresponding label.
-
-        Args:
-            diagnosis (str): The skin lesion diagnosis.
-
-        Returns:
-            int: The corresponding label for the diagnosis.
-        """
-        label_map = {
-            'akiec': 0,
-            'bcc': 1,
-            'bkl': 2,
-            'df': 3,
-            'mel': 4,
-            'nv': 5,
-            'vasc': 6
-        }
-        return label_map[diagnosis]
-
+   
 
 
 class SkinLesionDataModule(pl.LightningDataModule):

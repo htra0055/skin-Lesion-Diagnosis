@@ -106,7 +106,7 @@ def show_batch_images(dataloader: torch.utils.data.DataLoader):
     plt.show()
 
 
-def evaluate(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLoader, filepath: str) -> Tuple[int, int, float]:
+def evaluate(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLoader, folderpath: str, filename: str) -> Tuple[int, int, float]:
     """
     Evaluate the performance of a model on a test dataset. This includes 
     calculating the accuracy and generating confusion matrix.
@@ -120,7 +120,8 @@ def evaluate(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLo
         Tuple[int, int, float]: A tuple containing the number of correct predictions, total number of predictions,
         and the accuracy of the model on the test dataset.
     """
-    model.load_state_dict(torch.load(filepath))
+    print(f'Loading model from {folderpath}/{filename}')
+    model.load_state_dict(torch.load(f'{folderpath}/{filename}'))
     model.eval()  # Set model to evaluation mode
 
     all_preds = []
@@ -145,7 +146,7 @@ def evaluate(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLo
     print(f'Correct: {correct}, Total: {total}, Accuracy: {accuracy}')
 
     # Confusion matrix
-    show_confusion_matrix(all_preds_flat, all_labels_flat, filepath)
+    show_confusion_matrix(all_preds_flat, all_labels_flat, filename)
 
     return (correct, total, accuracy)
 
@@ -231,8 +232,7 @@ def evaluate_in_folder(model: pl.LightningModule, test_dataloader: torch.utils.d
     filenames = get_filenames_in_folder(folderpath)
 
     for file in filenames:
-        filepath = f'{folderpath}/{file}'
-        correct, total, accuracy = evaluate(model, test_dataloader, filepath)
+        correct, total, accuracy = evaluate(model, test_dataloader, folderpath, file)
         # save to csv file
         save_results_to_csv(file, output_file, (correct, total, accuracy))
 

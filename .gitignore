@@ -5,3 +5,4 @@ lightning_logs/
 model/__pycache__/
 models/
 resnetmodels/
+epoch_models/
