@@ -1,0 +1,9 @@
+Filename,Correct,Total,Accuracy
+trained_resmodel_11ep1.pth,689,1002,0.687624750499002
+trained_resmodel_13ep1.pth,759,1002,0.7574850299401198
+trained_resmodel_1ep1.pth,753,1002,0.7514970059880239
+trained_resmodel_2ep1.pth,758,1002,0.7564870259481038
+trained_resmodel_3ep1.pth,737,1002,0.7355289421157685
+trained_resmodel_4ep1.pth,759,1002,0.7574850299401198
+trained_resmodel_5ep1.pth,767,1002,0.7654690618762475
+trained_resmodel_6ep1.pth,744,1002,0.7425149700598802

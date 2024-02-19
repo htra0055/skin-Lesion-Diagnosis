@@ -8,7 +8,6 @@ import pytorch_lightning as pl
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from preparedata import SkinLesionDataModule
 from sklearn.metrics import confusion_matrix
 from torch import nn
 
@@ -30,6 +29,13 @@ class MyResNet(pl.LightningModule):
         # Modify the last layer for transfer learning
         num_ftrs = self.resnet.fc.in_features
         self.resnet.fc = nn.Linear(num_ftrs, num_classes)
+
+
+        if pretrained:
+            for param in self.resnet.parameters():
+                param.requires_grad = False
+            for param in self.resnet.fc.parameters():
+                param.requires_grad = True
 
         self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=7)
 
@@ -83,7 +89,7 @@ class MyResNet(pl.LightningModule):
         self.accuracy(outputs, labels)
         self.log('val_acc_step', self.accuracy,
                  on_step=True, on_epoch=False, prog_bar=True)
-
+        self.log('val_loss', loss)
         loss = nn.CrossEntropyLoss()(outputs, labels)
         return loss
 
@@ -121,33 +127,5 @@ class MyResNet(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
 
-    def on_test_epoch_end(self) -> None:
-        """
-        Performs operations at the end of the testing epoch.
-        """
-        # Flatten the labels and predictions to create confusion matrix
-        all_preds = self.test_step_preds
-        all_labels = self.test_step_labels
 
-        # Calculate the confusion matrix
-        cm = confusion_matrix(all_labels, all_preds)
-
-        # Visualize the confusion matrix
-        class_names = ['blk', 'nv', 'mel', 'bkl', 'bcc', 'akiec', 'vasc']
-
-        # Compute confusion matrix
-        cm = confusion_matrix(all_labels.cpu(), all_preds.cpu())
-
-        # Visualize the confusion matrix
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
-                    xticklabels=class_names, yticklabels=class_names)
-        plt.xlabel("Predicted labels")
-        plt.ylabel("True labels")
-        plt.title("Confusion Matrix")
-        plt.show()
-
-        correct, total, accuracy = self.evaluate_accuracy(
-            self.test_dataloader())
-        print(correct, total, accuracy)
 

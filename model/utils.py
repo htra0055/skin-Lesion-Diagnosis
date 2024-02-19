@@ -10,6 +10,8 @@ import os
 from typing import Tuple
 from matplotlib import pyplot as plt
 from sklearn.metrics import confusion_matrix
+from resnetmodel import MyResNet
+
 
 
 def obtain_data_path(user: str) -> Tuple[str, str]:
@@ -106,7 +108,7 @@ def show_batch_images(dataloader: torch.utils.data.DataLoader):
     plt.show()
 
 
-def evaluate(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLoader, folderpath: str, filename: str) -> Tuple[int, int, float]:
+def evaluate(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLoader, folderpath: str, filename: str, checkpoint: bool = False) -> Tuple[int, int, float]:
     """
     Evaluate the performance of a model on a test dataset. This includes 
     calculating the accuracy and generating confusion matrix.
@@ -121,9 +123,13 @@ def evaluate(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLo
         and the accuracy of the model on the test dataset.
     """
     print(f'Loading model from {folderpath}/{filename}')
-    model.load_state_dict(torch.load(f'{folderpath}/{filename}'))
+    # if .pth file
+    if not checkpoint:
+        model.load_state_dict(torch.load(f'{folderpath}/{filename}', map_location=torch.device('cpu')))
+    else:
+        model = MyResNet.load_from_checkpoint(f'{folderpath}/{filename}')
+    
     model.eval()  # Set model to evaluation mode
-
     all_preds = []
     all_labels = []
 
@@ -211,7 +217,7 @@ def get_filenames_in_folder(folder_path: str):
     return filenames
 
 
-def evaluate_in_folder(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLoader, folderpath: str, output_file: str) -> float:
+def evaluate_in_folder(model: pl.LightningModule, test_dataloader: torch.utils.data.DataLoader, folderpath: str, output_file: str, checkpoint: bool = False) -> float:
     """
     Evaluate the performance of a model on all files in a folder.
 
@@ -232,7 +238,7 @@ def evaluate_in_folder(model: pl.LightningModule, test_dataloader: torch.utils.d
     filenames = get_filenames_in_folder(folderpath)
 
     for file in filenames:
-        correct, total, accuracy = evaluate(model, test_dataloader, folderpath, file)
+        correct, total, accuracy = evaluate(model, test_dataloader, folderpath, file, checkpoint)
         # save to csv file
         save_results_to_csv(file, output_file, (correct, total, accuracy))
 

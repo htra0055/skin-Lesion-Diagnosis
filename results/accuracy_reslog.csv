@@ -1,0 +1,6 @@
+Filename,Correct,Total,Accuracy
+checkpoint-epoch=13-val_loss=0.63.ckpt,797,1002,0.7954091816367266
+checkpoint-epoch=16-val_loss=0.64.ckpt,753,1002,0.7514970059880239
+checkpoint-epoch=17-val_loss=0.63.ckpt,777,1002,0.7754491017964071
+checkpoint-epoch=19-val_loss=0.67.ckpt,776,1002,0.7744510978043913
+checkpoint-epoch=23-val_loss=0.63.ckpt,779,1002,0.7774451097804391

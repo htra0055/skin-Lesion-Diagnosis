@@ -6,3 +6,5 @@ model/__pycache__/
 models/
 resnetmodels/
 epoch_models/
+resnetv2models/
+logs/

@@ -56,7 +56,6 @@ class ModelCNN(pl.LightningModule):
         # self.relu = nn.ReLU()
         
         # Is this needed
-        self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=7)
         self.lr = lr
 
     def forward(self, x):
@@ -97,10 +96,9 @@ class ModelCNN(pl.LightningModule):
         images, labels = batch
         outputs = self(images)
 
-        self.accuracy(outputs, labels)
-        self.log('train_acc_step', self.accuracy, on_step=True, on_epoch=False, prog_bar=True)
-
         loss = nn.CrossEntropyLoss()(outputs, labels)
+        self.log('train_loss', loss, prog_bar=True)
+
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -118,10 +116,9 @@ class ModelCNN(pl.LightningModule):
         images, labels = batch
         outputs = self(images)
 
-        self.accuracy(outputs, labels)
-        self.log('val_acc_step', self.accuracy, on_step=True, on_epoch=False, prog_bar=True)
-
         loss = nn.CrossEntropyLoss()(outputs, labels)
+        self.log('val_loss', loss, prog_bar=True)
+
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -140,7 +137,6 @@ class ModelCNN(pl.LightningModule):
         outputs = self(images)
         loss = nn.CrossEntropyLoss()(outputs, labels)
 
-        self.log('val_acc_step', self.accuracy, on_step=True, on_epoch=False, prog_bar=True)
         return loss
 
 
@@ -183,22 +179,5 @@ class ModelCNN(pl.LightningModule):
         plt.axis('off')
         plt.show()
 
-    def on_test_epoch_end(self):
-        """
-        Function called at the end of each testing epoch.
-        Calculates the average loss, logs it, and saves the results to a file.
-
-        Returns:
-            dict: A dictionary containing the average test loss.
-
-        """
-        all_outputs = self.test_saved_outputs
-        losses = torch.tensor([output['loss'] for output in all_outputs])
-        avg_loss = losses.mean()
-        self.log('test_loss', avg_loss, prog_bar=True)
-        results_dict = {'test_loss': avg_loss.item()}
-        with open('test_results.json', 'w') as file:
-            json.dump(results_dict, file)
-        return {'avg_test_loss': avg_loss.item()}
 
     

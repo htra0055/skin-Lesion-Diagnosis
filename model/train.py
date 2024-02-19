@@ -2,7 +2,9 @@ import pytorch_lightning as pl
 import torch
 from preparedata import SkinLesionDataModule
 from model import ModelCNN
+from resnetmodel import MyResNet
 from utils import obtain_data_path
+from matplotlib import pyplot as plt
 
 # Set paths to metadata and image folders (put 'A' for Aaron, or 'E' for Evelyn)
 metadata_file_path, image_file_path = obtain_data_path('A')
@@ -24,14 +26,23 @@ def main():
     learning_rates = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]
 
     # Create a model instance and load the data
-    model = ModelCNN()
+    model = MyResNet()
 
     # Train the data
-    trainer = pl.Trainer(max_epochs=10)
+    trainer = pl.Trainer(max_epochs=5, callbacks=[pl.callbacks.ProgressBar()])
     trainer.fit(model, train_dataloader, val_dataloader)
 
     # Saving the trained model into file 'trained_model.pth'
     torch.save(model.state_dict(), 'trained_model_2_ep.pth')
+
+    
+    # Plot loss vs. epoch
+    plt.plot(range(len(trainer.callback_metrics['train_loss'])), trainer.callback_metrics['train_loss'])
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Training Loss vs. Epoch')
+    plt.show()
+    
 
     
 if __name__ == "__main__":

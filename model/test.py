@@ -1,7 +1,8 @@
 from resnetmodel import MyResNet
 from model import ModelCNN
 from preparedata import SkinLesionDataModule
-from utils import evaluate_in_folder, obtain_data_path
+from utils import evaluate_in_folder, obtain_data_path, evaluate_accuracy
+import torch
 
 
 # Set paths to metadata and image folders (put 'A' for Aaron, or 'E' for Evelyn)
@@ -23,22 +24,29 @@ def main():
 
     # Evaluate ResNet50 models (confusion matrix + accuracy)
     
-    model = MyResNet()
-    model.eval()
-    folder_path = "resnetmodels"
-    output_file = 'results/accuracy_res.csv'
-
-    evaluate_in_folder(model, test_dataloader, folder_path, output_file)
-
-    # model = ModelCNN()
+    # model = MyResNet()
     # model.eval()
-    # folder_path = "models"
-    # output_file = 'results/accuracy.csv'
+    # folder_path = "resnetv2models"
+    # output_file = 'results/accuracy_resv2.csv'
 
     # evaluate_in_folder(model, test_dataloader, folder_path, output_file)
 
+    # # model = ModelCNN()
+    # # model.eval()
+    # # folder_path = "models"
+    # # output_file = 'results/accuracy.csv'
 
+    # # evaluate_in_folder(model, test_dataloader, folder_path, output_file)
 
+    # Evaluate checkpoints
+    # model = MyResNet()
+    # model.eval()
+    # folder_path = "logs"
+    # output_file = 'results/accuracy_reslog.csv'
 
+    # evaluate_in_folder(model, test_dataloader, folder_path, output_file, True)
+    path = 'logs\checkpoint-epoch=13-val_loss=0.63.ckpt'
+    model = MyResNet.load_from_checkpoint(path)
+    
 if __name__ == "__main__":
     main()
