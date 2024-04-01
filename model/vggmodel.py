@@ -12,29 +12,29 @@ from sklearn.metrics import confusion_matrix
 from torch import nn
 
 
-class MyResNet(pl.LightningModule):
-    def __init__(self, num_classes=7, pretrained=False):
+class MyVGG(pl.LightningModule):
+    def __init__(self, num_classes=7, pretrained=True):
         """
         Initializes a MyResNet model.
 
         Args:
             num_classes (int): The number of classes for classification.
-            pretrained (bool, optional): Whether to use pre-trained weights for the ResNet model. Defaults to True.
+            pretrained (bool, optional): Whether to use pre-trained weights for the VGG model. Defaults to True.
         """
-        super(MyResNet, self).__init__()
+        super(MyVGG, self).__init__()
 
         # Load pre-trained ResNet50 model
-        self.resnet = models.resnet50(pretrained=pretrained)
+        self.vgg = models.vgg16(pretrained=pretrained)
 
         # Modify the last layer for transfer learning
-        num_ftrs = self.resnet.fc.in_features
-        self.resnet.fc = nn.Linear(num_ftrs, num_classes)
+        num_ftrs = self.vgg.classifier[-1].in_features
+        self.vgg.classifier[-1] = nn.Linear(num_ftrs, num_classes)
 
 
         if pretrained:
-            for param in self.resnet.parameters():
+            for param in self.vgg.parameters():
                 param.requires_grad = False
-            for param in self.resnet.fc.parameters():
+            for param in self.vgg.classifier.parameters():
                 param.requires_grad = True
 
         self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=7)
@@ -49,7 +49,7 @@ class MyResNet(pl.LightningModule):
         Returns:
             torch.Tensor: The output tensor.
         """
-        return self.resnet(x)
+        return self.vgg(x)
 
     def training_step(self, batch, batch_idx):
         """

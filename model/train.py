@@ -3,6 +3,7 @@ import torch
 from preparedata import SkinLesionDataModule
 from model import ModelCNN
 from resnetmodel import MyResNet
+from vggmodel import MyVGG
 from utils import obtain_data_path
 from matplotlib import pyplot as plt
 
@@ -26,14 +27,14 @@ def main():
     learning_rates = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]
 
     # Create a model instance and load the data
-    model = MyResNet()
+    model = MyVGG()
 
     # Train the data
     trainer = pl.Trainer(max_epochs=5, callbacks=[pl.callbacks.ProgressBar()])
     trainer.fit(model, train_dataloader, val_dataloader)
 
     # Saving the trained model into file 'trained_model.pth'
-    torch.save(model.state_dict(), 'trained_model_2_ep.pth')
+    torch.save(model.state_dict(), 'trained_vggmodel_1_ep.pth')
 
     
     # Plot loss vs. epoch
